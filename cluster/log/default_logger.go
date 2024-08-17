@@ -18,6 +18,16 @@ func Init(opt *Options) {
 	defaultLogger = New(opt)
 }
 
+func SetDefaultLogger(l *slog.Logger, w io.Writer, opt *Options) {
+	mu.Lock()
+	defer mu.Unlock()
+	defaultLogger = &Logger{
+		writer: w,
+		Logger: l,
+		opt:    opt,
+	}
+}
+
 // Default returns the default logger instance.
 func Default() *slog.Logger {
 	return defaultLogger.Logger
