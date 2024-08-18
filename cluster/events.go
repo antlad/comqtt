@@ -7,6 +7,7 @@ package cluster
 import (
 	"bytes"
 	"errors"
+	"go.uber.org/zap"
 
 	msg "github.com/wind-c/comqtt/v2/cluster/message"
 	"github.com/wind-c/comqtt/v2/mqtt"
@@ -86,6 +87,11 @@ func (h *MqttEventHook) OnWillSent(cl *mqtt.Client, pk packets.Packet) {
 
 // OnSubscribed is called when a client subscribes to one or more filters.
 func (h *MqttEventHook) OnSubscribed(cl *mqtt.Client, pk packets.Packet, reasonCodes []byte, counts []int) {
+	h.Log.Debug("OnSubscribed",
+		zap.String("client", cl.ID),
+		zap.Any("topic", pk.TopicName),
+		zap.Any("counts", counts),
+	)
 	if len(pk.Filters) == 0 {
 		return
 	}
@@ -98,6 +104,7 @@ func (h *MqttEventHook) OnSubscribed(cl *mqtt.Client, pk packets.Packet, reasonC
 				ProtocolVersion: cl.Properties.ProtocolVersion,
 				Payload:         []byte(v.Filter),
 			}
+			h.Log.Debug("submit raft task", zap.Any("clID", cl.ID), zap.String("nodeID", h.agent.GetLocalName()))
 			h.agent.SubmitRaftTask(&m)
 		}
 	}

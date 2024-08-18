@@ -501,6 +501,7 @@ func (s *Server) inheritClientSession(pk packets.Packet, cl *Client) bool {
 				atomic.AddInt64(&s.Info.Subscriptions, 1)
 				s.hooks.OnSubscribed(existing, packets.Packet{Filters: []packets.Subscription{sub}}, []byte{sub.Qos}, []int{count})
 			}
+			s.Log.Debug("add new sub1", "filter", sub.Filter, "clID", cl.ID)
 			cl.State.Subscriptions.Add(sub.Filter, sub)
 			s.publishRetainedToClient(cl, sub, !isNew)
 		}
@@ -949,6 +950,17 @@ func (s *Server) PublishToSubscribers(pk packets.Packet, local bool) {
 
 	sharedFilters := make(map[string]bool)
 	subscribers := s.Topics.Subscribers(pk.TopicName)
+
+	for k, v := range subscribers.Subscriptions {
+		s.Log.Debug("subscribers", "k", k, "shareName", v.ShareName)
+	}
+
+	for k, v := range subscribers.Shared {
+		for kk, vv := range v {
+			s.Log.Debug("subscribers shared", "k", k, "shareName", vv.ShareName, "kk", kk)
+		}
+	}
+
 	if len(subscribers.Shared) > 0 {
 		subscribers = s.hooks.OnSelectSubscribers(subscribers, pk)
 		if len(subscribers.SharedSelected) == 0 {
@@ -1228,6 +1240,7 @@ func (s *Server) processSubscribe(cl *Client, pk packets.Packet) error {
 			if isNew {
 				atomic.AddInt64(&s.Info.Subscriptions, 1)
 			}
+			s.Log.Debug("add new sub3", "filter", sub.Filter, "clID", cl.ID)
 			cl.State.Subscriptions.Add(sub.Filter, sub) // [MQTT-3.2.2-10]
 
 			if sub.Qos > s.Options.Capabilities.MaximumQos {
@@ -1607,6 +1620,7 @@ func (s *Server) loadSubscriptions(v []storage.Subscription) {
 		// isNew represents whether to subscribe for the first time
 		if isNew, count := s.Topics.Subscribe(sub.Client, sb); isNew {
 			if cl, ok := s.Clients.Get(sub.Client); ok {
+				s.Log.Debug("add new sub2", "filter", sub.Filter, "clID", cl.ID)
 				cl.State.Subscriptions.Add(sub.Filter, sb)
 				s.hooks.OnSubscribed(cl, packets.Packet{Filters: []packets.Subscription{sb}}, []byte{sub.Qos}, []int{count})
 			}

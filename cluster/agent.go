@@ -248,10 +248,13 @@ func (a *Agent) raftApplyListener() {
 
 // send the message to the leader apply
 func (a *Agent) raftPropose(msg *message.Message) {
+	log.Debug("raft propose", "nodeID", msg.NodeID, "clientID", msg.ClientID)
 	if a.raftPeer.IsApplyRight() {
+		log.Debug("raft propose IsApplyRight=true", "nodeID", msg.NodeID, "clientID", msg.ClientID)
 		err := a.raftPeer.Propose(msg)
 		OnApplyLog(a.GetLocalName(), msg.NodeID, msg.Type, msg.Payload, "raft apply log", err)
 	} else { //send to leader apply
+
 		_, leaderId := a.raftPeer.GetLeader()
 		if leaderId == "" {
 			if a.Config.GrpcEnable {
@@ -268,6 +271,7 @@ func (a *Agent) raftPropose(msg *message.Message) {
 			}
 			OnApplyLog(leaderId, msg.NodeID, msg.Type, msg.Payload, "raft forward log", nil)
 		}
+		log.Debug("raft propose IsApplyRight=false", "leaderId", leaderId, "nodeID", msg.NodeID, "clientID", msg.ClientID)
 	}
 }
 
@@ -398,15 +402,21 @@ func (a *Agent) SubmitOutPublishTask(pk *packets.Packet, sharedFilters map[strin
 }
 
 func (a *Agent) SubmitOutConnectTask(pk *packets.Packet) {
-	a.OutPool.Submit(func() {
+	err := a.OutPool.Submit(func() {
 		a.processOutboundConnect(pk)
 	})
+	if err != nil {
+		log.Error("submit raft task", "error", err)
+	}
 }
 
 func (a *Agent) SubmitRaftTask(msg *message.Message) {
-	a.raftPool.Submit(func() {
+	err := a.raftPool.Submit(func() {
 		a.raftPropose(msg)
 	})
+	if err != nil {
+		log.Error("submit raft task", "error", err)
+	}
 }
 
 // processOutboundPublish process outbound publish msg
