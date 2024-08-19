@@ -248,7 +248,6 @@ func (a *Agent) raftApplyListener() {
 
 // send the message to the leader apply
 func (a *Agent) raftPropose(msg *message.Message) {
-	log.Debug("propose", string(msg.JsonBytes()))
 	if a.raftPeer.IsApplyRight() {
 		err := a.raftPeer.Propose(msg)
 		OnApplyLog(a.GetLocalName(), msg.NodeID, msg.Type, msg.Payload, "raft apply log", err)
