@@ -7,7 +7,6 @@ package cluster
 import (
 	"bytes"
 	"errors"
-
 	msg "github.com/wind-c/comqtt/v2/cluster/message"
 	"github.com/wind-c/comqtt/v2/mqtt"
 	"github.com/wind-c/comqtt/v2/mqtt/packets"

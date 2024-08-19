@@ -501,6 +501,7 @@ func (s *Server) inheritClientSession(pk packets.Packet, cl *Client) bool {
 				atomic.AddInt64(&s.Info.Subscriptions, 1)
 				s.hooks.OnSubscribed(existing, packets.Packet{Filters: []packets.Subscription{sub}}, []byte{sub.Qos}, []int{count})
 			}
+
 			cl.State.Subscriptions.Add(sub.Filter, sub)
 			s.publishRetainedToClient(cl, sub, !isNew)
 		}
@@ -949,6 +950,7 @@ func (s *Server) PublishToSubscribers(pk packets.Packet, local bool) {
 
 	sharedFilters := make(map[string]bool)
 	subscribers := s.Topics.Subscribers(pk.TopicName)
+
 	if len(subscribers.Shared) > 0 {
 		subscribers = s.hooks.OnSelectSubscribers(subscribers, pk)
 		if len(subscribers.SharedSelected) == 0 {
