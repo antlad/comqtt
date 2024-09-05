@@ -35,16 +35,15 @@ func (f *Fsm) Apply(l *raft.Log) interface{} {
 		return nil
 	}
 	filter := string(msg.Payload)
-	deliverable := false
 	if msg.Type == packets.Subscribe {
-		deliverable = f.Add(filter, msg.NodeID)
+		f.Add(filter, msg.NodeID)
 	} else if msg.Type == packets.Unsubscribe {
-		deliverable = f.Del(filter, msg.NodeID)
+		f.Del(filter, msg.NodeID)
 	} else {
 		return nil
 	}
-	log.Info("raft apply", "from", msg.NodeID, "filter", filter, "type", msg.Type)
-	if f.notifyCh != nil && deliverable {
+	
+	if f.notifyCh != nil {
 		f.notifyCh <- &msg
 	}
 

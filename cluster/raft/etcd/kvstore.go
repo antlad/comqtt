@@ -91,7 +91,6 @@ func (s *KVStore) readCommits() {
 			} else {
 				continue
 			}
-			log.Info("raft apply", "from", msg.NodeID, "filter", filter, "type", msg.Type)
 			if s.notifyCh != nil && deliverable {
 				s.notifyCh <- &msg
 			}

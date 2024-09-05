@@ -518,7 +518,7 @@ func OnJoinLog(nodeId, addr, prompt string, err error) {
 	if err != nil {
 		log.Error(prompt, "error", err, "node", nodeId, "addr", addr)
 	} else {
-		log.Info(prompt, "node", nodeId, "addr", addr)
+		log.Debug(prompt, "node", nodeId, "addr", addr)
 	}
 }
 
@@ -526,15 +526,15 @@ func OnApplyLog(leaderId, nodeId string, tp byte, filter []byte, prompt string, 
 	if err != nil {
 		log.Error(prompt, "error", err, "leader", leaderId, "from", nodeId, "type", tp, "filter", filter)
 	} else {
-		log.Info(prompt, "leader", leaderId, "from", nodeId, "type", tp, "filter", filter)
+		log.Debug(prompt, "leader", leaderId, "from", nodeId, "type", tp, "filter", filter)
 	}
 }
 
 func OnPublishPacketLog(direction byte, nodeId, cid, topic string, pid uint16) {
 	if direction == DirectionInbound {
-		log.Info("publish message", "d", "inbound", "from", nodeId, "cid", cid, "pid", pid, "topic", topic)
+		log.Debug("publish message", "d", "inbound", "from", nodeId, "cid", cid, "pid", pid, "topic", topic)
 	} else {
-		log.Info("publish message", "d", "outbound", "to", nodeId, "cid", cid, "pid", pid, "topic", topic)
+		log.Debug("publish message", "d", "outbound", "to", nodeId, "cid", cid, "pid", pid, "topic", topic)
 	}
 }
 
